@@ -42,6 +42,8 @@ def check_alarm_tag(instance_id, tag_key):
     try:
         ec2_client = boto3_client('ec2')
         # does instance have appropriate alarm tag?
+
+        logger.info('check for tags instance {}  tag {}'.format(instance_id, tag_key))
         instance = ec2_client.describe_instances(
             Filters=[
                 {
@@ -70,6 +72,7 @@ def check_alarm_tag(instance_id, tag_key):
                     }
                 ]
             )
+            logger.info('found for tags instance {}  tag {}'.format(instance_id, tag_key))
             return instance['Reservations'][0]['Instances'][0]
         else:
             return False
@@ -507,6 +510,7 @@ def scan_and_process_alarm_tags(create_alarm_tag, default_alarms, metric_dimensi
         ec2_client = boto3_client('ec2')
         for reservation in ec2_client.describe_instances()["Reservations"]:
             for instance in reservation["Instances"]:
+                logger.debug("SCAN: Instance {} state {}".format(instance["InstanceId"],instance["State"]["Code"] ))
                 # Look for running instances only
                 if instance["State"]["Code"] > 16:
                     continue
