@@ -339,10 +339,12 @@ def process_alarm_tags(instance_id, instance_info, default_alarms, metric_dimens
     # scan instance tags and create alarms for any custom alarm tags
     for instance_tag in tags:
         if instance_tag['Key'].startswith(alarm_identifier):
+            logger.debug("Found Tag {}  {}".format(instance_id, instance_tag['key']))
             create_alarm_from_tag(instance_id, instance_tag, instance_info, metric_dimensions_map, sns_topic_arn,
                                   alarm_separator, alarm_identifier)
 
     if create_default_alarms_flag == 'true':
+        logger.debug("Found Tag {}  createing ".format(instance_id))
         for alarm_tag in default_alarms['AWS/EC2']:
             create_alarm_from_tag(instance_id, alarm_tag, instance_info, metric_dimensions_map, sns_topic_arn,
                                   alarm_separator, alarm_identifier)
@@ -514,7 +516,10 @@ def scan_and_process_alarm_tags(create_alarm_tag, default_alarms, metric_dimensi
                 # Look for running instances only
                 if instance["State"]["Code"] > 16:
                     continue
+
+                logger.debug("SCAN RUNNING: Instance {}".format(instance["InstanceId"] ))
                 if check_alarm_tag(instance["InstanceId"], create_alarm_tag):
+                    logger.debug("SCAN HAS ALARM TAG: Instance {}".format(instance["InstanceId"]))
                     process_alarm_tags(instance["InstanceId"], instance, default_alarms, metric_dimensions_map,
                                        sns_topic_arn, cw_namespace, create_default_alarms_flag, alarm_separator,
                                        alarm_identifier)
